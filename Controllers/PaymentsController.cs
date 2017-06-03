@@ -12,12 +12,12 @@ namespace Serugees.Api.Controllers
         [HttpGet("{memberId}/loans/{loanId}/payments")]
         public IActionResult GetPayments(int memberId, int loanId)
         {
-              var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.MemberId == memberId);
+              var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.Id == memberId);
               if(member == null)
               {
                   return NotFound();
               }
-              var loan = member.Loans.FirstOrDefault(l => l.LoanId == loanId);
+              var loan = member.Loans.FirstOrDefault(l => l.Id == loanId);
               if(loan == null)
               {
                   return NotFound();
@@ -28,19 +28,19 @@ namespace Serugees.Api.Controllers
         [HttpGet("{memberId}/loans/{loanId}/payments/{id}", Name = "GetPayment")]
         public IActionResult GetPayment(int memberId, int loanId, int id)
         {
-              var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.MemberId == memberId);
+              var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.Id == memberId);
               if(member == null)
               {
                   return NotFound();
               }
               
-              var loan = member.Loans.FirstOrDefault(l => l.LoanId == loanId);
+              var loan = member.Loans.FirstOrDefault(l => l.Id == loanId);
               if(loan == null)
               {
                   return NotFound();
               }
               
-              var payment = loan.Payments.FirstOrDefault(p => p.PaymentId == id);
+              var payment = loan.Payments.FirstOrDefault(p => p.Id == id);
               if(payment == null)
               {
                   return NotFound();
@@ -61,22 +61,22 @@ namespace Serugees.Api.Controllers
                 return BadRequest();
             }
 
-            var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.MemberId == memberId);
+            var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.Id == memberId);
             if(member == null)
             {
                 return NotFound();
             }
 
-            var loan = member.Loans.FirstOrDefault(l => l.LoanId == loanId);
+            var loan = member.Loans.FirstOrDefault(l => l.Id == loanId);
             if(loan == null)
             {
                 return NotFound();
             }
 
-            var maxPaymentId = member.Loans.SelectMany(p => p.Payments).Max(pt => pt.PaymentId);
+            var maxPaymentId = member.Loans.SelectMany(p => p.Payments).Max(paid => paid.Id);
             var finalPayment = new Payment()
             {
-                  PaymentId = ++maxPaymentId,
+                  Id = ++maxPaymentId,
                   AmoutPaid = 500000,
                   OutstandingBalance = 0,
                   NextInstallmentDueDate = DateTime.Now,
@@ -86,7 +86,7 @@ namespace Serugees.Api.Controllers
 
               loan.Payments.Add(finalPayment);
               return CreatedAtRoute("GetPayment", new {
-                  loandId = loanId, id = finalPayment.PaymentId
+                  loandId = loanId, id = finalPayment.Id
               });
         }
 

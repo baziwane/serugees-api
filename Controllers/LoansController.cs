@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Serugees.Api.Models;
 using Microsoft.Extensions.Logging;
+using Serugees.Api.Services;
 
 namespace Serugees.Api.Controllers
 {
@@ -11,16 +12,18 @@ namespace Serugees.Api.Controllers
     public class LoansController : Controller
     {
         private ILogger<LoansController> _logger;
+        private IMailService _mailService;
 
-        public LoansController (ILogger<LoansController> logger)
+        public LoansController (ILogger<LoansController> logger, IMailService mail)
         {
             _logger = logger;
+            _mailService = mail;
         }
 
         [HttpGet("{memberId}/loans")]
         public IActionResult GetLoans(int memberId)
         {
-            var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.MemberId == memberId);
+            var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.Id == memberId);
             if(member == null)
             {
                 _logger.LogInformation($"No loan for member with Id { memberId } was found");
@@ -32,12 +35,12 @@ namespace Serugees.Api.Controllers
         [HttpGet("{memberId}/loans/{id}", Name = "GetLoan")]
         public IActionResult GetLoan(int memberId, int id)
         {
-                var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.MemberId == memberId);
+                var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.Id == memberId);
                 if(member == null)
                 {
                     return NotFound();
                 }
-                var loan = member.Loans.FirstOrDefault(l => l.LoanId == id);
+                var loan = member.Loans.FirstOrDefault(l => l.Id == id);
                 if(loan == null)
                 {
                     return NotFound();
@@ -58,17 +61,17 @@ namespace Serugees.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.MemberId == memberId);
+            var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.Id == memberId);
             if(member == null)
             {
                 return NotFound();
             }
 
             var maxLoanId = MembersDataStore.Current.Members
-                                .SelectMany(m => m.Loans).Max(l => l.LoanId);
+                                .SelectMany(m => m.Loans).Max(l => l.Id);
             var finalLoan = new Loan()
             {
-                  LoanId = ++maxLoanId,
+                  Id = ++maxLoanId,
                   Amount = 6000000,
                   DateRequested = DateTime.Today,
                   Duration = 2,
@@ -76,8 +79,9 @@ namespace Serugees.Api.Controllers
             };
 
             member.Loans.Add(finalLoan);
+            _mailService.Send($"New Loan Request Added {loan.Amount}", $"A new loan has been added by {memberId}");
             return CreatedAtRoute("GetLoan", new {
-                memberId = memberId, id = finalLoan.LoanId
+                memberId = memberId, id = finalLoan.Id
             });
         }
     }

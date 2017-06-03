@@ -7,9 +7,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Debug;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Newtonsoft.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
+using Serugees.Api.Services;
+using Serugees.Api.Models;
 
 namespace Serugees.Api
 {
@@ -31,6 +35,11 @@ namespace Serugees.Api
                         castedResolver.NamingStrategy = null;
                     }
                 });
+            // inject our localMailService to allow sending mail whenever a new payment is registered.    
+            services.AddTransient<IMailService, LocalMailService>();
+            //var connectionString = Configuration.GetValue<string>("PostgresDb:ConnectionString") ?? Configuration.GetConnectionString("DefaultConnection_docker");
+            //services.AddDbContext<SerugeesContext>(options => options.UseNpgsql(connectionString));
+            services.AddDbContext<SerugeesContext>(options => options.UseInMemoryDatabase());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

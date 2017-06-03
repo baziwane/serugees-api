@@ -18,7 +18,7 @@ namespace Serugees.Api.Controllers
         [HttpGet("{id}")]
         public IActionResult GetMember(int id)
         {
-            var memberToReturn = MembersDataStore.Current.Members.FirstOrDefault(m => m.MemberId == id);
+            var memberToReturn = MembersDataStore.Current.Members.FirstOrDefault(m => m.Id == id);
             if(memberToReturn == null){
                 return NotFound();
             }
