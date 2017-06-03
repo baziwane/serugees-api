@@ -11,13 +11,19 @@ namespace Serugees.Api.Controllers
     public class LoansController : Controller
     {
         private ILogger<LoansController> _logger;
-        
+
+        public LoansController (ILogger<LoansController> logger)
+        {
+            _logger = logger;
+        }
+
         [HttpGet("{memberId}/loans")]
         public IActionResult GetLoans(int memberId)
         {
             var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.MemberId == memberId);
             if(member == null)
             {
+                _logger.LogInformation($"No loan for member with Id { memberId } was found");
                 return NotFound();
             }
             return Ok(member.Loans);
@@ -26,16 +32,16 @@ namespace Serugees.Api.Controllers
         [HttpGet("{memberId}/loans/{id}", Name = "GetLoan")]
         public IActionResult GetLoan(int memberId, int id)
         {
-              var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.MemberId == memberId);
-              if(member == null)
-              {
-                  return NotFound();
-              }
-              var loan = member.Loans.FirstOrDefault(l => l.LoanId == id);
-              if(loan == null)
-              {
-                  return NotFound();
-              }
+                var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.MemberId == memberId);
+                if(member == null)
+                {
+                    return NotFound();
+                }
+                var loan = member.Loans.FirstOrDefault(l => l.LoanId == id);
+                if(loan == null)
+                {
+                    return NotFound();
+                }
               return Ok(loan);
         }
 

@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v1.1",
-    "signature": "09021392b18028e90f1c23656923a6fc6225b981"
+    "signature": "07519961a3996ec3f947cfd49d5a3b243d4af5a3"
   },
   "compilationOptions": {
     "defines": [
@@ -26,6 +26,7 @@
           "Microsoft.AspNetCore": "1.1.1",
           "Microsoft.AspNetCore.Mvc": "1.0.0",
           "Microsoft.AspNetCore.Mvc.Formatters.Xml": "1.0.0",
+          "Microsoft.Extensions.Logging.Debug": "1.0.0",
           "Microsoft.NETCore.App": "1.1.1"
         },
         "runtime": {
@@ -966,6 +967,18 @@
         },
         "compile": {
           "lib/netstandard1.3/Microsoft.Extensions.Logging.Console.dll": {}
+        }
+      },
+      "microsoft.extensions.logging.debug/1.0.0": {
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "1.1.1",
+          "System.Diagnostics.Debug": "4.3.0"
+        },
+        "runtime": {
+          "lib/netstandard1.3/Microsoft.Extensions.Logging.Debug.dll": {}
+        },
+        "compile": {
+          "lib/netstandard1.3/Microsoft.Extensions.Logging.Debug.dll": {}
         }
       },
       "microsoft.extensions.objectpool/1.1.0": {
@@ -3412,6 +3425,13 @@
       "sha512": "sha512-Ah04S9oMOoXpwgjMND7FuWZMBEnek5xPMoRh7QYymjOcJo/hm/kGL9rYn+G0dhhFGZz8EVkjZAy595ML+wafwQ==",
       "path": "microsoft.extensions.logging.console/1.1.1",
       "hashPath": "microsoft.extensions.logging.console.1.1.1.nupkg.sha512"
+    },
+    "microsoft.extensions.logging.debug/1.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-V8fP8pGJxieGa1DAYOF1RX+cCGGqdOGNoAQUzxmy27+qNzbHB/cUXc7mCZT72jPZMB4U12zSVWlIt26GMsUIOg==",
+      "path": "microsoft.extensions.logging.debug/1.0.0",
+      "hashPath": "microsoft.extensions.logging.debug.1.0.0.nupkg.sha512"
     },
     "microsoft.extensions.objectpool/1.1.0": {
       "type": "package",
