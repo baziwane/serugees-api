@@ -25,9 +25,10 @@ namespace Serugees.Api
         {
              var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-                //.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
-            builder.AddEnvironmentVariables();
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+                
             Configuration = builder.Build();
         }
 
@@ -50,13 +51,15 @@ namespace Serugees.Api
             // inject our localMailService to allow sending mail whenever a new payment is registered.    
             services.AddTransient<IMailService, LocalMailService>();
             //var connectionString = Configuration.GetValue<string>("PostgresDb:ConnectionString") ?? Configuration.GetConnectionString("DockerConnection");
-            var connectionString = Configuration.GetConnectionString("DefaultConnection");
+            var connectionString = Configuration.GetConnectionString("SerugeesDbConnectionString");
             services.AddDbContext<SerugeesContext>(options => options.UseNpgsql(connectionString));
             //services.AddDbContext<SerugeesContext>(options => options.UseInMemoryDatabase());
+            services.AddScoped<ISerugeesRepository, SerugeesRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory,
+            SerugeesContext context)
         {
             if (env.IsDevelopment())
             {
@@ -64,9 +67,12 @@ namespace Serugees.Api
                 loggerFactory.AddConsole();
                 loggerFactory.AddDebug();
             }
-            else{
+            else
+            {
                 app.UseExceptionHandler();
             }
+
+            context.EnsureSeedDataForContext();
             app.UseStatusCodePages();
             app.UseMvc();
         }
