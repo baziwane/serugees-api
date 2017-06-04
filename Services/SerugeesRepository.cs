@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using Serugees.Api.Models;
+using Serugees.Api.Entities;
 
 namespace Serugees.Api.Services
 {
@@ -54,18 +54,19 @@ namespace Serugees.Api.Services
 
         public Payment GetPaymentForLoanForMember(int memberId, int loanId, int paymentId)
         {
-            return _context.Loans
-                .Where(l => l.MemberId == memberId).FirstOrDefault()
-                .Payments
-                .Where(p => p.LoanId == loanId && p.Id == paymentId).FirstOrDefault();
+            var loanAssoc = _context.Loans.Include(l => l.Payments)
+                .Where(l => l.Id == loanId && l.MemberId == memberId).FirstOrDefault();
+
+            return loanAssoc.Payments
+                .Where(p => p.Id == paymentId && p.LoanId == loanId).FirstOrDefault();
         }
 
         public IEnumerable<Payment> GetAllPaymentsForLoanForMember(int memberId, int loanId)
         {
-            return _context.Loans
-                .Where(l => l.MemberId == memberId).FirstOrDefault()
-                .Payments
-                .Where(p => p.LoanId == loanId).ToList();
+            var loanAssoc = _context.Loans.Include(l => l.Payments)
+                .Where(l => l.Id == loanId && l.MemberId == memberId).FirstOrDefault();
+
+            return loanAssoc.Payments.ToList();
         }
     }
 }

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Serugees.Api.Models;
+using Serugees.Api.Entities;
 
 namespace Serugees.Api.Services
 {

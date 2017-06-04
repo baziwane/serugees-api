@@ -74,6 +74,14 @@ namespace Serugees.Api
 
             context.EnsureSeedDataForContext();
             app.UseStatusCodePages();
+            AutoMapper.Mapper.Initialize(cfg => 
+            {
+                cfg.CreateMap<Entities.Member, Models.MemberWithoutLoansDto>();
+                cfg.CreateMap<Entities.Member, Models.MemberDto>();
+                cfg.CreateMap<Entities.Loan, Models.LoanDto>();
+                cfg.CreateMap<Entities.Loan, Models.LoanWithoutPaymentsDto>();
+                cfg.CreateMap<Entities.Payment, Models.PaymentDto>();
+            });
             app.UseMvc();
         }
     }

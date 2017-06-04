@@ -2,6 +2,7 @@ using System;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Serugees.Api.Models;
 using Microsoft.Extensions.Logging;
 using Serugees.Api.Services;
@@ -13,76 +14,95 @@ namespace Serugees.Api.Controllers
     {
         private ILogger<LoansController> _logger;
         private IMailService _mailService;
+        private ISerugeesRepository _repository;
 
-        public LoansController (ILogger<LoansController> logger, IMailService mail)
+        public LoansController (ILogger<LoansController> logger, IMailService mail,
+            ISerugeesRepository repository)
         {
             _logger = logger;
             _mailService = mail;
+            _repository = repository;
         }
 
         [HttpGet("{memberId}/loans")]
         public IActionResult GetLoans(int memberId)
         {
-            var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.Id == memberId);
-            if(member == null)
+            try
             {
-                _logger.LogInformation($"No loan for member with Id { memberId } was found");
-                return NotFound();
+                if(!_repository.MemberExists(memberId))
+                {
+                    _logger.LogInformation($"Member with id {memberId} was not found when accessing loan.");
+                    return NotFound();
+                }
+                var loansForMember = _repository.GetAllLoansForMember(memberId);
+                var results = Mapper.Map<IEnumerable<LoanWithoutPaymentsDto>>(loansForMember);
+                return Ok(results);
             }
-            return Ok(member.Loans);
+            catch (System.Exception ex)
+            {         
+                _logger.LogCritical($"Exception while retrieving member with id {memberId}.", ex);
+                return StatusCode(500, "A Fatal error occurred while processing your request.");
+            }
         }
 
         [HttpGet("{memberId}/loans/{id}", Name = "GetLoan")]
-        public IActionResult GetLoan(int memberId, int id)
+        public IActionResult GetLoan(int memberId, int id, bool includePayments = false)
         {
-                var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.Id == memberId);
-                if(member == null)
-                {
-                    return NotFound();
-                }
-                var loan = member.Loans.FirstOrDefault(l => l.Id == id);
-                if(loan == null)
-                {
-                    return NotFound();
-                }
-              return Ok(loan);
-        }
-
-        [HttpPost("{memberId}/loans")]
-        public IActionResult AddLoan(int memberId, [FromBody]Loan loan)
-        {
-            if (loan == null)
-            {
-                return BadRequest();
-            }
-
-            if(!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.Id == memberId);
-            if(member == null)
+            if(!_repository.MemberExists(memberId))
             {
                 return NotFound();
             }
-
-            var maxLoanId = MembersDataStore.Current.Members
-                                .SelectMany(m => m.Loans).Max(l => l.Id);
-            var finalLoan = new Loan()
+            var loan = _repository.GetLoanForMember(memberId, id, includePayments);
+            if(loan == null)
             {
-                  Id = ++maxLoanId,
-                  Amount = 6000000,
-                  DateRequested = DateTime.Today,
-                  Duration = 2,
-                  IsActive = true
-            };
+                return NotFound();
+            }
+            if(includePayments)
+            {
+                var loanResult = Mapper.Map<LoanDto>(loan);
+                return Ok(loanResult);
+            }
+            var loanToReturn = Mapper.Map<LoanWithoutPaymentsDto>(loan);
 
-            member.Loans.Add(finalLoan);
-            _mailService.Send($"New Loan Request Added {loan.Amount}", $"A new loan has been added by {memberId}");
-            return CreatedAtRoute("GetLoan", new {
-                memberId = memberId, id = finalLoan.Id
-            });
+            return Ok(loanToReturn);
         }
+
+        // [HttpPost("{memberId}/loans")]
+        // public IActionResult AddLoan(int memberId, [FromBody]LoanDto loan)
+        // {
+        //     throw NotImplementedException();
+        //     // if (loan == null)
+        //     // {
+        //     //     return BadRequest();
+        //     // }
+
+        //     // if(!ModelState.IsValid)
+        //     // {
+        //     //     return BadRequest(ModelState);
+        //     // }
+
+        //     // var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.Id == memberId);
+        //     // if(member == null)
+        //     // {
+        //     //     return NotFound();
+        //     // }
+
+        //     // var maxLoanId = MembersDataStore.Current.Members
+        //     //                     .SelectMany(m => m.Loans).Max(l => l.Id);
+        //     // var finalLoan = new LoanDto()
+        //     // {
+        //     //       Id = ++maxLoanId,
+        //     //       Amount = 6000000,
+        //     //       DateRequested = DateTime.Today,
+        //     //       Duration = 2,
+        //     //       IsActive = true
+        //     // };
+
+        //     // member.Loans.Add(finalLoan);
+        //     // _mailService.Send($"New Loan Request Added {loan.Amount}", $"A new loan has been added by {memberId}");
+        //     // return CreatedAtRoute("GetLoan", new {
+        //     //     memberId = memberId, id = finalLoan.Id
+        //     // });
+        // }
     }
 }
