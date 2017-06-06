@@ -83,7 +83,7 @@ namespace Serugees.Api
                 cfg.CreateMap<Models.CreateLoanDto, Entities.Loan>();
                 cfg.CreateMap<Models.CreateMemberDto, Entities.Member>();
                 cfg.CreateMap<Entities.Payment, Models.PaymentDto>();
-                 cfg.CreateMap<Models.CreatePaymentDto, Entities.Payment>();
+                cfg.CreateMap<Models.CreatePaymentDto, Entities.Payment>();
             });
             app.UseMvc();
         }
