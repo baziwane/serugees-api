@@ -6,7 +6,6 @@
 *.user
 *.userosscache
 *.sln.docstates
-*.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -43,6 +42,7 @@ dlldata.c
 
 # DNX
 project.lock.json
+appsettings.json
 project.fragment.lock.json
 artifacts/
 
