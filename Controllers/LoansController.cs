@@ -67,42 +67,34 @@ namespace Serugees.Api.Controllers
             return Ok(loanToReturn);
         }
 
-        // [HttpPost("{memberId}/loans")]
-        // public IActionResult AddLoan(int memberId, [FromBody]LoanDto loan)
-        // {
-        //     throw NotImplementedException();
-        //     // if (loan == null)
-        //     // {
-        //     //     return BadRequest();
-        //     // }
+        [HttpPost("{memberId}/loans")]
+        public IActionResult AddLoan(int memberId, [FromBody]CreateLoanDto loan)
+        {
+            
+            if(!_repository.MemberExists(memberId))
+            {
+                return NotFound();
+            }
 
-        //     // if(!ModelState.IsValid)
-        //     // {
-        //     //     return BadRequest(ModelState);
-        //     // }
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var finalLoan = Mapper.Map<Entities.Loan>(loan);
 
-        //     // var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.Id == memberId);
-        //     // if(member == null)
-        //     // {
-        //     //     return NotFound();
-        //     // }
+            _repository.AddLoanForMember(memberId, finalLoan);
 
-        //     // var maxLoanId = MembersDataStore.Current.Members
-        //     //                     .SelectMany(m => m.Loans).Max(l => l.Id);
-        //     // var finalLoan = new LoanDto()
-        //     // {
-        //     //       Id = ++maxLoanId,
-        //     //       Amount = 6000000,
-        //     //       DateRequested = DateTime.Today,
-        //     //       Duration = 2,
-        //     //       IsActive = true
-        //     // };
+            if(!_repository.Save())
+            {
+                return StatusCode(500, "A Fatal error occurred while performing this operation.");
+            } 
 
-        //     // member.Loans.Add(finalLoan);
-        //     // _mailService.Send($"New Loan Request Added {loan.Amount}", $"A new loan has been added by {memberId}");
-        //     // return CreatedAtRoute("GetLoan", new {
-        //     //     memberId = memberId, id = finalLoan.Id
-        //     // });
-        // }
+            var createdLoanToReturn = Mapper.Map<Models.LoanWithoutPaymentsDto>(finalLoan); 
+            // send an email about newly added loan
+            _mailService.Send($"New Loan Request Added {loan.Amount}", $"A new loan has been added by {memberId}");
+            
+            return CreatedAtRoute("GetLoan", new 
+            { memberId = memberId, id = createdLoanToReturn.Id }, createdLoanToReturn);
+        }
     }
 }

@@ -24,7 +24,7 @@ namespace Serugees.Api.Controllers
             return Ok(results);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetMember")]
         public IActionResult GetMember(int id, bool includeLoans = false)
         {
             var member = _repository.GetMember(id, includeLoans);
@@ -40,6 +40,38 @@ namespace Serugees.Api.Controllers
             var memberToReturn = Mapper.Map<MemberWithoutLoansDto>(member);
             return Ok(memberToReturn);
 
+        }
+
+        [HttpPost()]
+        public IActionResult AddMember([FromBody]CreateMemberDto member)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var memberToAdd = Mapper.Map<Entities.Member>(member);
+
+            if(!_repository.AddMember(memberToAdd))
+            {
+                return StatusCode(500, "A Fatal error occurred while performing this operation.");
+            }
+
+            var createdMemberToReturn = Mapper.Map<Models.MemberWithoutLoansDto>(memberToAdd); 
+            
+            return CreatedAtRoute("GetMember", new 
+            { id = createdMemberToReturn.Id }, createdMemberToReturn);
+        }
+
+        [HttpPatch("{id}")]
+        public IActionResult UpdateMember(int id, [FromBody]MemberDto member)
+        {
+            throw new NotImplementedException();
+        }
+
+         [HttpDelete("{id}")]
+        public IActionResult DeleteMember(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

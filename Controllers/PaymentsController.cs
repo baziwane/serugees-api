@@ -41,8 +41,7 @@ namespace Serugees.Api.Controllers
 
         [HttpGet("{memberId}/loans/{loanId}/payments/{id}", Name = "GetPayment")]
         public IActionResult GetPayment(int memberId, int loanId, int id)
-        {
-            
+        {    
             if(!_repository.MemberExists(memberId))
             {
                 return NotFound();
@@ -58,47 +57,35 @@ namespace Serugees.Api.Controllers
             return Ok(paymentToReturn);
         }
 
-        // [HttpPost("{memberId}/loans/{loanId}/payments")]
-        // public IActionResult AddPayment(int memberId, int loanId, [FromBody]PaymentDto payment)
-        // {
-        //     if (payment == null)
-        //     {
-        //         return BadRequest();
-        //     }
+         [HttpPost("{memberId}/loans/{loanId}/payments")]
+        public IActionResult AddPayment(int memberId, int loanId, [FromBody]CreatePaymentDto payment)
+        {
+            
+            if(!_repository.MemberExists(memberId))
+            {
+                return NotFound();
+            }
 
-        //     if(!ModelState.IsValid)
-        //     {
-        //         return BadRequest();
-        //     }
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var finalPayment = Mapper.Map<Entities.Payment>(payment);
 
-        //     var member = MembersDataStore.Current.Members.FirstOrDefault(m => m.Id == memberId);
-        //     if(member == null)
-        //     {
-        //         return NotFound();
-        //     }
+            _repository.AddLoanPaymentForMember(memberId, loanId, finalPayment);
 
-        //     var loan = member.Loans.FirstOrDefault(l => l.Id == loanId);
-        //     if(loan == null)
-        //     {
-        //         return NotFound();
-        //     }
+            if(!_repository.Save())
+            {
+                return StatusCode(500, "A Fatal error occurred while performing this operation.");
+            } 
 
-        //     var maxPaymentId = member.Loans.SelectMany(p => p.Payments).Max(paid => paid.Id);
-        //     var finalPayment = new PaymentDto()
-        //     {
-        //           Id = ++maxPaymentId,
-        //           AmoutPaid = 500000,
-        //           OutstandingBalance = 0,
-        //           NextInstallmentDueDate = DateTime.Now,
-        //           MinimumPaymentDueAtNextInstallment = 0,
-        //           DateDeposited = DateTime.Now
-        //     };
-
-        //       loan.Payments.Add(finalPayment);
-        //       return CreatedAtRoute("GetPayment", new {
-        //           loandId = loanId, id = finalPayment.Id
-        //       });
-        // }
+            var createdPaymentToReturn = Mapper.Map<Models.PaymentDto>(finalPayment); 
+            // send an email about newly added loan
+            _mailService.Send($"New Payment of {payment.AmoutPaid} for loan {loanId} added.", $"A new loan has been added by {memberId}");
+            
+            return CreatedAtRoute("GetPayment", new 
+            { memberId = memberId, loanId = loanId, id = createdPaymentToReturn.Id }, createdPaymentToReturn);
+        }
 
     }
 }
