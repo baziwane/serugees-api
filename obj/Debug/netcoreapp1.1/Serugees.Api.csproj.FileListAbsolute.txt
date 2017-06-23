@@ -1,8 +1,0 @@
-/Users/rbmatovu/Experiments/Serugees.Api/bin/Debug/netcoreapp1.1/Serugees.Api.deps.json
-/Users/rbmatovu/Experiments/Serugees.Api/bin/Debug/netcoreapp1.1/Serugees.Api.runtimeconfig.json
-/Users/rbmatovu/Experiments/Serugees.Api/bin/Debug/netcoreapp1.1/Serugees.Api.runtimeconfig.dev.json
-/Users/rbmatovu/Experiments/Serugees.Api/obj/Debug/netcoreapp1.1/Serugees.Api.AssemblyInfo.cs
-/Users/rbmatovu/Experiments/Serugees.Api/bin/Debug/netcoreapp1.1/Serugees.Api.dll
-/Users/rbmatovu/Experiments/Serugees.Api/bin/Debug/netcoreapp1.1/Serugees.Api.pdb
-/Users/rbmatovu/Experiments/Serugees.Api/obj/Debug/netcoreapp1.1/Serugees.Api.dll
-/Users/rbmatovu/Experiments/Serugees.Api/obj/Debug/netcoreapp1.1/Serugees.Api.pdb
