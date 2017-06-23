@@ -83,5 +83,10 @@ namespace Serugees.Api.Services
             var loan = GetLoanForMember(memberId, loanId, false);
             loan.Payments.Add(payment);
         }
+
+        public void DeleteMember(Member member)
+        {
+            _context.Members.Remove(member);
+        }
     }
 }

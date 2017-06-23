@@ -16,6 +16,7 @@ namespace Serugees.Api.Services
          void AddLoanForMember(int memberId, Loan loan);
          bool Save();
          bool AddMember(Member member);
+         void DeleteMember(Member member);
          void AddLoanPaymentForMember(int memberId, int loanId, Payment payment);
     }
 }

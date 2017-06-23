@@ -100,6 +100,10 @@ namespace Serugees.Api.Controllers
         [HttpPut("{memberId}/loans/{id}")]
         public IActionResult UpdateLoan(int memberId, int id, [FromBody]CreateLoanDto loan)
         {
+            if (loan == null)
+            {
+                return BadRequest();
+            }
              if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -126,5 +130,39 @@ namespace Serugees.Api.Controllers
 
             return NoContent();
         }
+
+        // [HttpPatch("{memberId}/loans/{id}")]
+        // public IActionResult PartiallyUpdateLoan(int memberId, int id, [FromBody]CreateLoanDto loan)
+        // {
+        //     if (loan == null)
+        //     {
+        //         return BadRequest();
+        //     }
+        //      if(!ModelState.IsValid)
+        //     {
+        //         return BadRequest(ModelState);
+        //     }
+
+        //     if(!_repository.MemberExists(memberId))
+        //     {
+        //         return NotFound();
+        //     }
+
+        //     var loansForMember = _repository.GetLoanForMember(memberId, id, false);
+            
+        //     if(loansForMember == null)
+        //     {
+        //         return NotFound();
+        //     }
+
+        //     Mapper.Map(loan, loansForMember);
+
+        //     if(!_repository.Save())
+        //     {
+        //         return StatusCode(500, "A Fatal error occurred while performing this operation.");
+        //     } 
+
+        //     return NoContent();
+        // }
     }
 }
