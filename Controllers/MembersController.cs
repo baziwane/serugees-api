@@ -11,10 +11,13 @@ namespace Serugees.Api.Controllers
     [Route("/api/members")]
     public class MembersController : Controller
     {
+        private IMailService _mailService;
         private ISerugeesRepository _repository;
-        public MembersController(ISerugeesRepository repository)
+        public MembersController(ISerugeesRepository repository,
+        IMailService mail)
         {
             _repository = repository;
+            _mailService = mail;
         }
         [HttpGet()]
         public IActionResult GetMembers()
@@ -63,15 +66,60 @@ namespace Serugees.Api.Controllers
         }
 
         [HttpPatch("{id}")]
-        public IActionResult UpdateMember(int id, [FromBody]MemberDto member)
+        public IActionResult UpdateMember(int id, [FromBody]CreateMemberDto member)
         {
-            throw new NotImplementedException();
+            if (member == null)
+            {
+                return BadRequest();
+            }
+             if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if(!_repository.MemberExists(id))
+            {
+                return NotFound();
+            }
+
+            var memberToUpdate = _repository.GetMember(id, false);
+            
+            if(memberToUpdate == null)
+            {
+                return NotFound();
+            }
+
+            Mapper.Map(member, memberToUpdate);
+
+            if(!_repository.Save())
+            {
+                return StatusCode(500, "A Fatal error occurred while performing this operation.");
+            } 
+
+            return NoContent();
+
         }
 
-         [HttpDelete("{id}")]
+        [HttpDelete("{id}")]
         public IActionResult DeleteMember(int id)
         {
-            throw new NotImplementedException();
+            if(!_repository.MemberExists(id)){
+                return NotFound();
+            }
+
+            var member = _repository.GetMember(id, false);
+            if(member == null){
+                return NotFound();
+            }
+            _repository.DeleteMember(member);
+
+            if(!_repository.Save()){
+                return StatusCode(500, "Sorry, an error occurred while processing your request.");
+            }
+
+            _mailService.Send($"{member.LastName} {member.FirstName} has been deleted.", $"A member has been deleted.");
+
+            return NoContent();
         }
     }
 }
